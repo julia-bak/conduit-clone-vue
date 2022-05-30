@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div v-if="isLoading">Loading...</div>
+    <Loader v-if="isLoading" />
 
-    <div v-if="error">Something bad happend</div>
+    <ErrorMessage v-if="error" />
 
     <div v-if="feed">
       <div
@@ -40,7 +40,7 @@
           <h1>{{ article.title }}</h1>
           <p>{{ article.description }}</p>
           <span>Read more...</span>
-          TAG LIST
+          <TagList :tags="article.tagList" />
         </router-link>
       </div>
       <Pagination 
@@ -60,7 +60,10 @@ import {mapState} from 'vuex'
 import {actionTypes} from '@/store/modules/feed'
 import Pagination from '@/components/Pagination'
 import {limit} from '@/helpers/vars'
-// import {stringify, parseUrl} from 'query-string'
+import {stringify, parseUrl} from 'query-string'
+import Loader from '@/components/Loader'
+import ErrorMessage from '@/components/ErrorMessage'
+import TagList from '@/components/TagList'
 
 export default {
   name: 'AppFeed',
@@ -70,7 +73,10 @@ export default {
     }
   },
   components: {
-    Pagination
+    Pagination,
+    Loader,
+    ErrorMessage,
+    TagList
   },
   props: {
     apiUrl: {
@@ -89,6 +95,9 @@ export default {
     },
     baseUrl() {
       return this.$route.path
+    },
+    offset(){
+      return this.currentPage * limit - limit
     }
   },
   watch: {
@@ -99,7 +108,14 @@ export default {
   },
   methods: {
     fetchFeed(){
-      this.$store.dispatch(actionTypes.getFeed, {apiUrl: this.apiUrl})
+      const parsedUrl = parseUrl(this.apiUrl)
+      const stringifiedParams = stringify({
+        limit,
+        offset: this.offset,
+        ...parsedUrl.query
+      })
+      const apiUrlWithParams = `${parsedUrl.url}?${stringifiedParams}`
+      this.$store.dispatch(actionTypes.getFeed, {apiUrl: apiUrlWithParams})
     }
   },
   mounted() {

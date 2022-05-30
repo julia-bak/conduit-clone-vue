@@ -6,7 +6,6 @@
     >
       {{ errorMessage }}
     </li>
-
   </ul>
 </template>
 
