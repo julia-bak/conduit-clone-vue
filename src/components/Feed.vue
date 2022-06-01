@@ -33,7 +33,11 @@
             <span class="date">{{ article.createdAt }}</span>
           </div>
           <div class="pull-xs-right">
-            ADD TO FAV
+            <AddToFavorites
+              :is-favorited="article.favorited"
+              :article-slug="article.slug"
+              :favorites-count="article.favoritesCount"
+            />
           </div>
         </div>
         <router-link :to="{name: 'article', params: {slug: article.slug}}" class="preview-link">
@@ -64,6 +68,7 @@ import {stringify, parseUrl} from 'query-string'
 import Loader from '@/components/Loader'
 import ErrorMessage from '@/components/ErrorMessage'
 import TagList from '@/components/TagList'
+import AddToFavorites from '@/components/AddToFavorites'
 
 export default {
   name: 'AppFeed',
@@ -76,7 +81,8 @@ export default {
     Pagination,
     Loader,
     ErrorMessage,
-    TagList
+    TagList,
+    AddToFavorites
   },
   props: {
     apiUrl: {
@@ -102,7 +108,9 @@ export default {
   },
   watch: {
     currentPage(){
-      console.log('cur')
+      this.fetchFeed()
+    },
+    apiUrl() {
       this.fetchFeed()
     }
   },
